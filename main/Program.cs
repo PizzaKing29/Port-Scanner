@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using System.Text.RegularExpressions;
+
 class Program
 {
     static void Main()
@@ -13,8 +15,10 @@ class Program
         Console.WriteLine("Ports 49152–65535 are dynamic/private ports (often assigned temporarily)\n");
         Console.Write("Max Port #: ");
         int maxPortNumber = Convert.ToInt32(Console.ReadLine());
+        ValidatePort(maxPortNumber);
         Console.Write("Enter an IP Address to scan for open/avaliable ports to connect to: ");
         string ipAddress = Console.ReadLine();
+        ValidateIPAddress(ipAddress);
         LoadingUI();
     }
 
@@ -23,7 +27,7 @@ class Program
         Console.Clear();
         Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
         Console.WriteLine("Please wait while this program checks for open ports...");
-        Console.WriteLine("Progress (6/1024) Ports checked");
+        Console.WriteLine("Progress (1/xxxx) Ports checked");
 
         while (true)
         {
@@ -35,6 +39,28 @@ class Program
             Console.Write("/\r");
             Thread.Sleep(120);
             Console.Write("-\r");
+        }
+    }
+
+    static void ValidateIPAddress(string ipAddress)
+    {
+        if (!Regex.IsMatch(ipAddress, @"^(\d{1,3}\.){3}\d{1,3}$")) // checks if the IP address is NOT valid
+        {
+            Console.Clear();
+            Console.Write("\nInvalid IP Address, press ENTER to try again... ");
+            Console.Read();
+            Main();
+        }
+    }
+
+    static void ValidatePort(int port)
+    {
+        if (port > 65535)
+        {
+            Console.Clear();
+            Console.Write($"\nPort '{port}' is too large for entry or is an invalid port entry, press ENTER to try again... ");
+            Console.Read();
+            Main();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using System.Data;
+using System.Drawing;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -6,11 +8,9 @@ using System.Threading.Tasks;
 class Program
 {
     static int MaxPortNumber = 0;
-    static string ipAddress = "";
-    static int PortsChecked = 0;
+    static string IpAddress = "";
     static bool Scanning;
-    static List<int> OpenPorts = new List<int>();
-    static List<int> ClosedPorts = new List<int>();
+    static List<Task> ConnectionTasks = new List<Task>();
 
     static void Main()
     {
@@ -26,8 +26,8 @@ class Program
         MaxPortNumber = Convert.ToInt32(Console.ReadLine());
         ValidatePort(MaxPortNumber);
         Console.Write("Enter an IP Address to scan for open/avaliable ports to connect to: ");
-        ipAddress = Console.ReadLine();
-        ValidateIPAddress(ipAddress);
+        IpAddress = Console.ReadLine();
+        ValidateIPAddress(IpAddress);
         Task.Run(ConnectToPort);
         Scanning = true;
         LoadingUI();
@@ -37,14 +37,12 @@ class Program
     {
 
         Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
+        Console.Clear();
+        Console.WriteLine("Please wait while this program checks for open ports...");
         
 
         while (Scanning) // Loading animation
         {
-            Console.Clear();
-            Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
-            Console.WriteLine("Please wait while this program checks for open ports...");
-            Console.WriteLine($"Ports checked ({PortsChecked}/{MaxPortNumber})");
             Thread.Sleep(100);
             Console.Write("\\\r");
             Thread.Sleep(120);
@@ -86,24 +84,15 @@ class Program
             try
             {
                 TcpClient tcpClient = new TcpClient();
-                await tcpClient.ConnectAsync(ipAddress, i);
-                if (tcpClient.Connected)
-                {
-                    OpenPorts.Add(i);
-                }
-                else
-                {
-                    ClosedPorts.Add(i);
-                }
+                ConnectionTasks.Add(tcpClient.ConnectAsync(IpAddress, i));
                 tcpClient.Close();
                 tcpClient.Dispose();
-                PortsChecked++;
             }
             catch
             {
                 // Console.Write("Port Failed");
-                PortsChecked++;
             }
         }
+        await Task.WhenAll(ConnectionTasks);
     }
 }

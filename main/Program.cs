@@ -1,6 +1,4 @@
 ﻿#nullable disable
-using System.Data;
-using System.Drawing;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,8 +7,9 @@ class Program
 {
     static int MaxPortNumber = 0;
     static string IpAddress = "";
+    static int PortsChecked = 0;
     static bool Scanning;
-    static List<Task> ConnectionTasks = new List<Task>();
+    static List<int> OpenPorts = new List<int>();
 
     static void Main()
     {
@@ -37,12 +36,14 @@ class Program
     {
 
         Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
-        Console.Clear();
-        Console.WriteLine("Please wait while this program checks for open ports...");
         
 
         while (Scanning) // Loading animation
         {
+            Console.Clear();
+            Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
+            Console.WriteLine("Please wait while this program checks for open ports...");
+            Console.WriteLine($"Ports checked ({PortsChecked}/{MaxPortNumber})");
             Thread.Sleep(100);
             Console.Write("\\\r");
             Thread.Sleep(120);
@@ -84,15 +85,20 @@ class Program
             try
             {
                 TcpClient tcpClient = new TcpClient();
-                ConnectionTasks.Add(tcpClient.ConnectAsync(IpAddress, i));
+                await tcpClient.ConnectAsync(IpAddress, i);
+                if (tcpClient.Connected)
+                {
+                    OpenPorts.Add(i);
+                }
                 tcpClient.Close();
                 tcpClient.Dispose();
+                PortsChecked++;
             }
             catch
             {
                 // Console.Write("Port Failed");
+                PortsChecked++;
             }
         }
-        await Task.WhenAll(ConnectionTasks);
     }
 }

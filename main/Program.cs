@@ -1,8 +1,17 @@
 ﻿#nullable disable
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 class Program
 {
+    static int MaxPortNumber = 0;
+    static string ipAddress = "";
+    static int PortsChecked = 0;
+    static bool Scanning;
+    static List<int> OpenPorts = new List<int>();
+    static List<int> ClosedPorts = new List<int>();
+
     static void Main()
     {
         Console.CursorVisible = true;
@@ -14,23 +23,28 @@ class Program
         Console.WriteLine("Ports 1025–49151 are registered ports (apps/services register them)");
         Console.WriteLine("Ports 49152–65535 are dynamic/private ports (often assigned temporarily)\n");
         Console.Write("Max Port #: ");
-        int maxPortNumber = Convert.ToInt32(Console.ReadLine());
-        ValidatePort(maxPortNumber);
+        MaxPortNumber = Convert.ToInt32(Console.ReadLine());
+        ValidatePort(MaxPortNumber);
         Console.Write("Enter an IP Address to scan for open/avaliable ports to connect to: ");
-        string ipAddress = Console.ReadLine();
+        ipAddress = Console.ReadLine();
         ValidateIPAddress(ipAddress);
+        Task.Run(ConnectToPort);
+        Scanning = true;
         LoadingUI();
     }
 
     static void LoadingUI()
     {
-        Console.Clear();
-        Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
-        Console.WriteLine("Please wait while this program checks for open ports...");
-        Console.WriteLine("Progress (1/xxxx) Ports checked");
 
-        while (true)
+        Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
+        
+
+        while (Scanning) // Loading animation
         {
+            Console.Clear();
+            Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
+            Console.WriteLine("Please wait while this program checks for open ports...");
+            Console.WriteLine($"Ports checked ({PortsChecked}/{MaxPortNumber})");
             Thread.Sleep(100);
             Console.Write("\\\r");
             Thread.Sleep(120);
@@ -40,6 +54,7 @@ class Program
             Thread.Sleep(120);
             Console.Write("-\r");
         }
+        Console.WriteLine("Finished ez");
     }
 
     static void ValidateIPAddress(string ipAddress)
@@ -61,6 +76,34 @@ class Program
             Console.Write($"\nPort '{port}' is too large for entry or is an invalid port entry, press ENTER to try again... ");
             Console.Read();
             Main();
+        }
+    }
+
+    static async Task ConnectToPort()
+    {
+        for (int i = 1; i < MaxPortNumber; i++)
+        {
+            try
+            {
+                TcpClient tcpClient = new TcpClient();
+                await tcpClient.ConnectAsync(ipAddress, i);
+                if (tcpClient.Connected)
+                {
+                    OpenPorts.Add(i);
+                }
+                else
+                {
+                    ClosedPorts.Add(i);
+                }
+                tcpClient.Close();
+                tcpClient.Dispose();
+                PortsChecked++;
+            }
+            catch
+            {
+                // Console.Write("Port Failed");
+                PortsChecked++;
+            }
         }
     }
 }

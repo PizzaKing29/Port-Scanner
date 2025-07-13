@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 class Program
 {
-    static int MaxPortNumber = 0;
+    static ushort MaxPortNumber = 0;
     static string IpAddress = "";
     static int PortsChecked = 0;
     static bool Scanning;
@@ -22,7 +22,7 @@ class Program
         Console.WriteLine("Ports 1025–49151 are registered ports (apps/services register them)");
         Console.WriteLine("Ports 49152–65535 are dynamic/private ports (often assigned temporarily)\n");
         Console.Write("Max Port #: ");
-        MaxPortNumber = Convert.ToInt32(Console.ReadLine());
+        MaxPortNumber = Convert.ToUInt16(Console.ReadLine());
         ValidatePort(MaxPortNumber);
         Console.Write("Enter an IP Address to scan for open/avaliable ports to connect to: ");
         IpAddress = Console.ReadLine();

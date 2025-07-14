@@ -7,8 +7,8 @@ class Program
 {
     static ushort MinPortNumber = 0;
     static ushort MaxPortNumber = 0;
-    static string IpAddress = "";
     static int PortsChecked = 0;
+    static string IpAddress = "";
     static bool Scanning;
     static List<int> OpenPorts = new List<int>();
 
@@ -41,7 +41,6 @@ class Program
         while (Scanning) // Loading animation
         {
             Console.Clear();
-            Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
             Console.WriteLine("Please wait while this program checks for open ports...");
             Console.WriteLine($"Ports Checked ({MinPortNumber + PortsChecked}/{MaxPortNumber})");
             Thread.Sleep(100);
@@ -84,14 +83,10 @@ class Program
         {
             try
             {
-                TcpClient tcpClient = new TcpClient();
+                using var tcpClient = new TcpClient();
                 await tcpClient.ConnectAsync(IpAddress, i);
                 if (tcpClient.Connected)
-                {
                     OpenPorts.Add(i);
-                }
-                tcpClient.Close();
-                tcpClient.Dispose();
                 PortsChecked++;
             }
             catch

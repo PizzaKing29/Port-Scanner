@@ -25,6 +25,3 @@ A simple asynchronous port scanner written in C# that checks for open TCP ports 
 5. View the list of open ports detected.
 
 ---
-
-## Example
-

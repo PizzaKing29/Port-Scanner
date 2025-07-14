@@ -18,18 +18,24 @@ class Program
         Console.Clear();
         Console.WriteLine("Port Scanner by PizzaKing29");
         Console.WriteLine("-------------------------------------------\n\n");
-        Console.WriteLine("Enter a max port range to check through...");
-        Console.WriteLine("Ports 1–1024 are well-known ports (HTTP, FTP, SSH, etc.)");
-        Console.WriteLine("Ports 1025–49151 are registered ports (apps/services register them)");
-        Console.WriteLine("Ports 49152–65535 are dynamic/private ports (often assigned temporarily)\n");
-        Console.Write("Min Port #: ");
-        MinPortNumber = Convert.ToUInt16(Console.ReadLine());
-        Console.Write("Max Port #: ");
-        MaxPortNumber = Convert.ToUInt16(Console.ReadLine());
-        ValidatePort(MaxPortNumber);
-        Console.Write("Enter an IP Address to scan for open/avaliable ports to connect to: ");
-        IpAddress = Console.ReadLine();
-        ValidateIPAddress(IpAddress);
+        do
+        {
+            Console.WriteLine("Enter a max port range to check through...");
+            Console.WriteLine("Ports 1–1024 are well-known ports (HTTP, FTP, SSH, etc.)");
+            Console.WriteLine("Ports 1025–49151 are registered ports (apps/services register them)");
+            Console.WriteLine("Ports 49152–65535 are dynamic/private ports (often assigned temporarily)\n");
+            Console.Write("Min Port #: ");
+            MinPortNumber = Convert.ToUInt16(Console.ReadLine());
+            Console.Write("Max Port #: ");
+            MaxPortNumber = Convert.ToUInt16(Console.ReadLine());
+        }
+        while (!ValidatePort(MinPortNumber, MaxPortNumber));
+        do
+        {
+            Console.Write("Enter an IP Address to scan for open/avaliable ports to connect to: ");
+            IpAddress = Console.ReadLine();
+        }
+        while (!ValidateIPAddress(IpAddress));
         Task.Run(ConnectToPort);
         Scanning = true;
         LoadingUI();
@@ -54,25 +60,35 @@ class Program
         }
     }
 
-    static void ValidateIPAddress(string ipAddress)
+    static bool ValidateIPAddress(string ipAddress)
     {
         if (!IPAddress.TryParse(ipAddress, out IPAddress address)) // checks if the IP address is NOT valid
         {
             Console.Clear();
             Console.Write("\nInvalid IP Address, press ENTER to try again... ");
             Console.Read();
-            Main();
+            Console.Clear();
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 
-    static void ValidatePort(int port)
+    static bool ValidatePort(int minPort, int maxPort)
     {
-        if (port > 65535)
+        if (minPort > 0 && maxPort > 65535)
         {
             Console.Clear();
-            Console.Write($"\nPort '{port}' is too large for entry or is an invalid port entry, press ENTER to try again... ");
+            Console.Write($"\nMinPort and MaxPort is too large or is an invalid entry, press 'ENTER' to try again...");
             Console.Read();
-            Main();
+            Console.Clear();
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 

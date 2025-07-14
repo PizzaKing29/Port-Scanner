@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 class Program
 {
+    static ushort MinPortNumber = 0;
     static ushort MaxPortNumber = 0;
     static string IpAddress = "";
     static int PortsChecked = 0;
@@ -21,6 +22,8 @@ class Program
         Console.WriteLine("Ports 1–1024 are well-known ports (HTTP, FTP, SSH, etc.)");
         Console.WriteLine("Ports 1025–49151 are registered ports (apps/services register them)");
         Console.WriteLine("Ports 49152–65535 are dynamic/private ports (often assigned temporarily)\n");
+        Console.Write("Min Port #: ");
+        MinPortNumber = Convert.ToUInt16(Console.ReadLine());
         Console.Write("Max Port #: ");
         MaxPortNumber = Convert.ToUInt16(Console.ReadLine());
         ValidatePort(MaxPortNumber);
@@ -40,7 +43,7 @@ class Program
             Console.Clear();
             Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
             Console.WriteLine("Please wait while this program checks for open ports...");
-            Console.WriteLine($"Ports checked ({PortsChecked}/{MaxPortNumber})");
+            Console.WriteLine($"Ports Checked ({MinPortNumber + PortsChecked}/{MaxPortNumber})");
             Thread.Sleep(100);
             Console.Write("\\\r");
             Thread.Sleep(120);
@@ -82,7 +85,7 @@ class Program
     static async Task ConnectToPort()
     {
         // MaxDegreeOfParallelism = 250 sets the max amount of ports that can be scanned at once
-        await Parallel.ForAsync(0, MaxPortNumber, new ParallelOptions { MaxDegreeOfParallelism = 250 }, async (i, CancellationToken) =>
+        await Parallel.ForAsync(MinPortNumber, MaxPortNumber, new ParallelOptions { MaxDegreeOfParallelism = 250 }, async (i, CancellationToken) =>
         {
             try
             {

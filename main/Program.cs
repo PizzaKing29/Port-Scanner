@@ -1,6 +1,6 @@
 ﻿#nullable disable
+using System.Net;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 class Program
@@ -34,10 +34,7 @@ class Program
 
     static void LoadingUI()
     {
-
         Console.CursorVisible = false; // Makes it so you cant type, for cleaner UI
-        
-
         while (Scanning) // Loading animation
         {
             Console.Clear();
@@ -58,7 +55,7 @@ class Program
 
     static void ValidateIPAddress(string ipAddress)
     {
-        if (!Regex.IsMatch(ipAddress, @"^(\d{1,3}\.){3}\d{1,3}$")) // checks if the IP address is NOT valid
+        if (!IPAddress.TryParse(ipAddress, out IPAddress address)) // checks if the IP address is NOT valid
         {
             Console.Clear();
             Console.Write("\nInvalid IP Address, press ENTER to try again... ");
@@ -76,11 +73,16 @@ class Program
             Console.Read();
             Main();
         }
+        else if (port < 0)
+        {
+            Console.WriteLine("negative number (add more logic stuff fr)");
+        }
     }
 
     static async Task ConnectToPort()
     {
-        for (int i = 1; i < MaxPortNumber; i++)
+        // MaxDegreeOfParallelism = 250 sets the max amount of ports that can be scanned at once
+        await Parallel.ForAsync(0, MaxPortNumber, new ParallelOptions { MaxDegreeOfParallelism = 250 }, async (i, CancellationToken) =>
         {
             try
             {
@@ -96,9 +98,16 @@ class Program
             }
             catch
             {
-                // Console.Write("Port Failed");
                 PortsChecked++;
             }
+        });
+
+        Console.Clear();
+        Console.WriteLine("List of open ports:");
+        foreach (var port in OpenPorts)
+        {
+            Console.WriteLine($"Port {port} is avaliable");
         }
+        Environment.Exit(exitCode: 0);
     }
 }

@@ -53,7 +53,6 @@ class Program
             Thread.Sleep(120);
             Console.Write("-\r");
         }
-        Console.WriteLine("Finished ez");
     }
 
     static void ValidateIPAddress(string ipAddress)
@@ -75,10 +74,6 @@ class Program
             Console.Write($"\nPort '{port}' is too large for entry or is an invalid port entry, press ENTER to try again... ");
             Console.Read();
             Main();
-        }
-        else if (port < 0)
-        {
-            Console.WriteLine("negative number (add more logic stuff fr)");
         }
     }
 
